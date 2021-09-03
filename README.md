@@ -1,6 +1,6 @@
 # Daz To O3DE
 ---
-* Owner: [Daz 3D][OwnerURL] � [@Daz3d][TwitterURL]
+* Owner: [Daz 3D][OwnerURL] — [@Daz3d][TwitterURL]
 * License: [Apache License, Version 2.0][LicenseURL] - see ``LICENSE`` and ``NOTICE`` for more information.
 * Official Project: [github.com/daz3d/DazToMaya][RepositoryURL]
 
