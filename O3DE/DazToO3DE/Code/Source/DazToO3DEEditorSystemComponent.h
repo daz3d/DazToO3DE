@@ -4,6 +4,7 @@
 #include <DazToO3DESystemComponent.h>
 
 #include <AzToolsFramework/Entity/EditorEntityContextBus.h>
+#include <Viewport/ActionBus.h>
 
 namespace DazToO3DE
 {
@@ -11,6 +12,7 @@ namespace DazToO3DE
     class DazToO3DEEditorSystemComponent
         : public DazToO3DESystemComponent
         , private AzToolsFramework::EditorEvents::Bus::Handler
+		, public AzToolsFramework::EditorMenuNotificationBus::Handler
     {
         using BaseSystemComponent = DazToO3DESystemComponent;
     public:
@@ -29,5 +31,11 @@ namespace DazToO3DE
         // AZ::Component
         void Activate() override;
         void Deactivate() override;
+
+    	// EditorMenuNotificationBus::Handler overrides ...
+    	void OnPopulateToolMenuItems() override;
+    	void OnResetToolMenuItems() override;
+
+        QAction* m_runDazImporterEditorAction = nullptr;
     };
 } // namespace DazToO3DE
