@@ -36,6 +36,8 @@ namespace DazToO3DE
     	void OnPopulateToolMenuItems() override;
     	void OnResetToolMenuItems() override;
 
+        void CopyDazAssetToProject() const;
+
         QAction* m_runDazImporterEditorAction = nullptr;
     };
 } // namespace DazToO3DE
