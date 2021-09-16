@@ -240,12 +240,14 @@ function DzBridgeDialog( oBridgeExporter )
 		wIncludeMorphsCbx.text = "Enable Morphs";
 		wIncludeMorphsCbx.checked = oExportInfo.bIncludeMorphs;
 		lytMorphs.addWidget( wIncludeMorphsCbx );
+		wIncludeMorphsCbx.enabled = false;
 
 		// Button to choose morph data
 		var wChooseMorphsBut = new DzPushButton( wMainWgt );
 		wChooseMorphsBut.text = "Choose Morphs";
 		wChooseMorphsBut.minWidth = 350;
 		lytMorphs.addWidget( wChooseMorphsBut );
+		wChooseMorphsBut.enabled = false;
 		
 		// Checkbox to export subdivisions
 		var wEnableSubdivCbx = new DzCheckBox( wMainWgt );
@@ -264,6 +266,7 @@ function DzBridgeDialog( oBridgeExporter )
 		wIncludeAnimationsCbx.text = "Include animation data";
 		wIncludeAnimationsCbx.checked = oExportInfo.bIncludeAnim;
 		lytSettings.addWidget( wIncludeAnimationsCbx );
+		wIncludeAnimationsCbx.enabled = false;
 
 		// Advanced Settings
 		this.wAdvanceSettings = new DzGroupBox( wMainWgt );	
@@ -283,7 +286,7 @@ function DzBridgeDialog( oBridgeExporter )
 		// Checkbox to collect textures at export
 		var wCollectTexturesCbx = new DzCheckBox( this.wAdvWgt );
 		wCollectTexturesCbx.text = "Collect Textures";
-		wCollectTexturesCbx.checked = oExportInfo.bCollectTextures;
+		wCollectTexturesCbx.checked = true; //oExportInfo.bCollectTextures;
 		lytAdvance.addWidget( wCollectTexturesCbx );
 
 		// Checkbox to Remove incompatible nodes
@@ -297,6 +300,7 @@ function DzBridgeDialog( oBridgeExporter )
 		wNewSubdiv.text = "Better Subdivision Export";
 		wNewSubdiv.checked = oExportInfo.bNewSubdiv;
 		lytAdvance.addWidget( wNewSubdiv )
+		wNewSubdiv.enabled = false;
 
 		// Checkbox to use Transfer Utility
 		var wTransferUtil = new DzCheckBox( this.wAdvWgt );
