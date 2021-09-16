@@ -1,0 +1,93 @@
+/** 
+* Handles the changes of Subdivision for Daz and the new Export Method.
+* @class
+* @constructor
+* @param {String} sScriptPath
+* @param {Object} oExportInfo
+*/
+function DzBridgeSubdivision( sScriptPath, oExportInfo )
+{
+    this.init( sScriptPath, oExportInfo )
+};
+
+    /*********************************************************************/
+    DzBridgeSubdivision.prototype.init = function( sScriptPath, oExportInfo )
+    {
+        this.sScriptPath = sScriptPath;
+        this.bNewSubdiv = oExportInfo.bNewSubdiv;
+        this.aSubdivisionCombos = oExportInfo.aSubdivisionCombos;
+    };
+
+    /*********************************************************************/
+	/** 
+	* Void: Used to export out the subdivisions chosen by user. 
+	* @param {Boolean} bSubdivEnabled - Based on user's input to export out Subdivisions.
+	*/
+    DzBridgeSubdivision.prototype.lockSubdivisionProperties = function( bSubdivEnabled )
+    {
+        for( var i = 0; i < this.aSubdivisionCombos.length; i++ ){
+            var oSubdivInfo = this.aSubdivisionCombos[i]
+            oNode = oSubdivInfo.node;
+            oObject = oNode.getObject();
+            if( oObject ){
+                oShape = oObject.getCurrentShape();
+                oGeo = oShape.getGeometry();
+                if( oGeo ){
+                    var oLod = oShape.findProperty( "lodlevel" )
+					var oSubD = oShape.findProperty( "SubDIALevel" )
+					oSubD.lock( false );
+					if( bSubdivEnabled ){
+						oLod.setValue( 1 )
+						var nTargetValue = oSubdivInfo.currentItem;
+						oSubD.setDoubleValue( nTargetValue )
+					}
+					else{
+						oLod.setValue( 0 )
+						oSubD.setDoubleValue( 0.0 )
+					}
+					oSubD.lock( true )
+                }
+            }
+        }
+    };
+
+	/*********************************************************************/
+	/** 
+	* Void: Used to run the DzFBXBridges and allow the skin weights to be transferred
+	* @param {String} sDtufilename - Path for the DTU File
+	*/ 
+	DzBridgeSubdivision.prototype.processFBX = function( sDtufilename )
+	{
+		oProcess = new DzProcess()
+		oProcess.communication = DzProcess.Stdin | DzProcess.Stdout | DzProcess.Stderr;	
+		oProcess.arguments = [String( '"%2/dzBridgeUtils/DzFBXBridges.exe" "%1"' ).arg( sDtufilename ).arg( this.sScriptPath ) ];
+		print(String( '"%2/dzBridgeUtils/DzFBXBridges.exe" "%1"' ).arg( sDtufilename ).arg( this.sScriptPath ))
+		connect( oProcess, "readyReadStdout()", this, "readStdout" );
+		connect( oProcess, "readyReadStderr()", this, "readStderr" );
+		oProcess.start()
+	};
+	
+ 
+	/*********************************************************************/
+	/** 
+	* Void: Used to check if the fbx sdk 2020 exists in the path needed
+	*/
+	DzBridgeSubdivision.prototype.isSubdivPrereq = function()
+	{
+		if( this.bNewSubdiv ){
+			oFileInfo = new DzFileInfo( String( '%1/dzBridgeUtils/libfbxsdk.dll' ).arg( this.sScriptPath ) );
+			if( !oFileInfo.exists() && MessageBox.warning(
+				qsTr( "To use subdivision the FBX SDK 2020 is needed." ),
+				"Subdivisions Error", qsTr( "&OK" ), qsTr( "&Cancel" ) ) == 1 ){
+				return;
+			}
+			else{
+				return true
+			}
+		}
+		else{
+			return
+		}
+	};
+
+	

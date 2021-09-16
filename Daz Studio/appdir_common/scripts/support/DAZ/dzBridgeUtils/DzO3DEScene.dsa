@@ -1,0 +1,262 @@
+/** 
+* Used to Create the type of Exports that exist in the scene
+* @class
+* @constructor
+*/
+function DzBridgeScene()
+{
+    this.init()
+};
+DzBridgeScene.prototype = Object.create( DzBridgeHelpers.prototype );
+DzBridgeScene.constructor = DzBridgeScene;
+DzBridgeScene.superclass = DzBridgeHelpers.prototype;
+
+	/*********************************************************************/
+    DzBridgeScene.prototype.init = function()
+    {
+        this.aFigures = [];
+        this.aEnvProp = [];
+		this.aToReparent = [];
+		this.aRemoved = [];
+		this.oToExport = {}
+		this.oExportInfo = {
+			"nExportType" : 0,
+			"oNode" : null,
+			"oParent" : null,
+			"wExportOption" : null,
+			"wEnable" : null,
+			"wSettings" : null,
+			"bEnable" : true,
+			"bIncludeSubdiv" : false,
+			"bIncludeAnim" : false,
+			"bIncludeMorphs" : false,
+			"bCollectTextures" : false,
+			"bRemoveIncompatible" : false,
+			"bAutoWeights" : false,
+			"bNewSubdiv" : false,
+			"aExportableProperties" : [],
+			"aSubdivisionCombos" : [],
+			"aInfluenceWeights" : []
+		}
+		DzBridgeScene.superclass.init.call( this )
+    };
+
+    /*********************************************************************/
+	/** 
+	* Used to Create the type of Exports that exist in the scene
+	* @param {DzNode} oChildNode - the Child node of the RootNodes Found
+	* @return {String} Daz Content Type of given Node.
+	* @memberof DzBridgeScene
+	*/
+	DzBridgeScene.prototype.checkChildType = function( oChildNode )
+	{
+		var oAssetMgr = App.getAssetMgr();
+		var sContentType = oAssetMgr.getTypeForNode( oChildNode );
+		return sContentType
+	};
+
+	/*********************************************************************/
+	// TODO: Add a UI to allow the user to choose how they wish to export every asset
+	// void : Check the node and what type of export it is. 
+	DzBridgeScene.prototype.findRootNodes = function( oNode )
+	{
+		this.oToExport[oNode.elementID] = new DzBridgeScene().oExportInfo;
+		this.oToExport[oNode.elementID].oNode = oNode;
+		var oParent;
+		var oOrgParent;
+		var aChildFigures = [];
+		var sClassName = oNode.className();
+		var oAssetMgr = App.getAssetMgr();
+		var sContentType = oAssetMgr.getTypeForNode( oNode );
+		if( sClassName == "DzFigure" 
+		   || sClassName == "DzLegacyFigure" ){
+			if( sContentType == "Actor/Character" 
+				|| sContentType == "Actor" ){
+				
+				this.oToExport[oNode.elementID].nExportType = this.oExportTypes.Figure
+				this.aFigures.push( oNode );
+				return
+			}
+			else{
+				this.oToExport[oNode.elementID].nExportType = this.oExportTypes.EnvProp
+				this.aEnvProp.push( oNode );
+				return
+			}
+		}
+		else if( sClassName == "DzGroupNode" ){
+			aChildren = oNode.getNodeChildren( true );
+			for( var j = 0; j < aChildren.length; j += 1 ){
+				oChildNode = aChildren[j]
+				sContentType = this.checkChildType( oChildNode );
+				if( sContentType == "Actor/Character"
+					|| sContentType == "Actor" && oChildNode.findNodeChild( "hip", false )){
+					aChildFigures.push( oChildNode )
+				}
+			}
+			if( aChildFigures.length > 0 ){
+				for( var i = 0; i < aChildFigures.length; i++ ){
+					var oChild = aChildFigures[i]
+					this.aFigures.push( oChild )
+					this.oToExport[oChild.elementID] = this.oExportInfo
+					this.oToExport[oChild.elementID].nExportType = this.oExportTypes.Figure
+					oParent = oChild.getNodeParent();
+					if( oParent == oNode ){
+						oNode.removeNodeChild( oChild, inPlace = true );
+					}
+					else{
+						oOrgParent = oParent
+						while( oParent != null ){
+							oParent.removeNodeChild( oChild, inPlace = true );
+							oParent = oChild.getNodeParent();
+						}
+						oParent = oOrgParent;
+					}
+					this.oToExport[oChild.elementID].oParent = oParent;
+					this.oToExport[oChild.elementID].oNode = oChild;
+					var aParentChain = new Array ( oParent, oChild );
+					this.aToReparent.push( aParentChain );
+				}
+			}
+			else if ( oNode.getNodeChildren( true ).length > 0 ){
+				this.oToExport[oNode.elementID].nExportType = this.oExportTypes.EnvProp
+				this.aEnvProp.push( oNode );
+			}
+			
+		}
+		else{
+			this.oToExport[oNode.elementID].nExportType = this.oExportTypes.EnvProp
+			this.aEnvProp.push( oNode );
+			return
+		} 
+	};
+	
+	/*********************************************************************/
+	// void : ...
+	// TODO : refactor - use oNode.assetUri instead of oNode.name
+	DzBridgeScene.prototype.buildRootLists = function()
+	{
+		var oNode;
+		var aChildren;
+		
+		var aNodes = Scene.getNodeList();
+		for( var i = 0; i < aNodes.length; i += 1 ){
+			oNode = aNodes[i];
+			if( !oNode.isVisible() ){
+				if( oNode.isRootNode() ){ 
+					oNode.setVisible( true );
+					aChildren = oNode.getNodeChildren( true );
+					for( var j = 0; j < aChildren.length; j += 1 ){
+						aChildren[j].setVisible( true );
+					}
+				}
+				continue;
+			}
+	
+			if( oNode.isRootNode() && oNode.isVisible() ){
+				this.findRootNodes( oNode )
+			}
+		}
+	};
+
+	/*********************************************************************/
+	// void : ...
+	DzBridgeScene.prototype.reparentFigure = function( oExportInfo )
+	{
+		var oParent = oExportInfo.oParent 
+		if( oParent ){
+			oParent.addNodeChild( oExportInfo.oNode , inPlace = true)
+		}
+	};
+
+	/*********************************************************************/
+	DzBridgeScene.prototype.getExportType = function()
+	{
+		if( this.aFigures.length == 0 && this.aEnvProp.length == 0 ){
+			return this.oExportTypes.None;
+		}
+		else if( this.aEnvProp.length == 0 ){
+			return this.oExportTypes.Figure;
+		}
+		else if( this.aFigures.length == 0 ){
+			return this.oExportTypes.EnvProp;
+		}
+		else{
+			return this.oExportTypes.Both;
+		}
+	};	
+
+	/*********************************************************************/
+	/** 
+	* Based on user's input we will remove the type of export they do not want.
+	* @param {Number} nExportType - The type recieve from DzBridgeDialog.promptExportType
+	*/
+	DzBridgeScene.prototype.overrideExportType = function( nExportType )
+	{	
+		if( nExportType == this.oExportTypes.Figure){
+			this.aRemoved = this.aEnvProp;
+			this.aEnvProp = [];
+			return
+		}
+		else if( nExportType == this.oExportTypes.Both ){
+			return
+		}
+		else{
+			this.aRemoved = this.aFigures;
+			this.aFigures = [];
+			return
+		}
+	};
+
+	/*********************************************************************/
+	// void : ...
+	DzBridgeScene.prototype.setHideRoot = function( bIsFigure, bYesNo )
+	{
+		if( bIsFigure ){
+			for( var i = 0; i < this.aFigures.length; i += 1 ){
+				this.setVisible( this.aFigures[i], bYesNo );
+			}
+			for( var i = 0; i < this.aRemoved.length; i += 1 ){
+				this.setVisible( this.aRemoved[i], bYesNo );
+			}
+		} else {
+			for( var i = 0; i < this.aEnvProp.length; i += 1 ){
+				this.setVisible( this.aEnvProp[i], bYesNo );
+			}
+			for( var i = 0; i < this.aRemoved.length; i += 1 ){
+				this.setVisible( this.aRemoved[i], bYesNo );
+			}
+		}
+	};
+	
+	/*********************************************************************/
+	// void : ...
+	DzBridgeScene.prototype.setOnlyVisible = function( oExportNode )
+	{
+		this.setVisible( oExportNode, true )
+		for( nElementId in this.oToExport ){
+			oNode = this.oToExport[nElementId].oNode;
+			if( oExportNode == oNode ){
+				continue
+			}
+			else{
+				this.setVisible( oNode, false )
+			}
+		}
+	};
+	
+
+	/*********************************************************************/
+	// void : ...
+	DzBridgeScene.prototype.setVisible = function( oBaseNode, bYesNo )
+	{
+		var aChildren = oBaseNode.getNodeChildren( true );
+		for( var i = 0; i < aChildren.length; i += 1 ){
+			aChildren[i].setVisible( bYesNo );
+		}
+		
+		oBaseNode.setVisible( bYesNo );
+	};
+	
+
+
+
