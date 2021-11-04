@@ -67,12 +67,12 @@ namespace DazToO3DE
     void DazToO3DESystemComponent::Activate()
     {
         DazToO3DERequestBus::Handler::BusConnect();
-        AZ::TickBus::Handler::BusConnect();
+        //AZ::TickBus::Handler::BusConnect();
     }
 
     void DazToO3DESystemComponent::Deactivate()
     {
-        AZ::TickBus::Handler::BusDisconnect();
+        //AZ::TickBus::Handler::BusDisconnect();
         DazToO3DERequestBus::Handler::BusDisconnect();
     }
 

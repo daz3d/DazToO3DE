@@ -4,7 +4,9 @@
 #include <DazToO3DESystemComponent.h>
 
 #include <AzToolsFramework/Entity/EditorEntityContextBus.h>
+#include <Component/EditorComponentAPIBus.h>
 #include <Viewport/ActionBus.h>
+#include <AzCore/Component/TickBus.h>
 
 namespace DazToO3DE
 {
@@ -22,6 +24,14 @@ namespace DazToO3DE
         DazToO3DEEditorSystemComponent();
         ~DazToO3DEEditorSystemComponent();
 
+    	enum AssetStatus
+    	{
+    		Completed,
+    		Pending,
+    		Failed,
+    		None
+    	};
+
     private:
         static void GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided);
         static void GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible);
@@ -36,8 +46,17 @@ namespace DazToO3DE
     	void OnPopulateToolMenuItems() override;
     	void OnResetToolMenuItems() override;
 
-        void CopyDazAssetToProject() const;
+    	// TickBus::Handler overrides ...
+    	void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
+
+        bool CopyDazAssetToProject() const;
+        void SetupAssetEntity();
+        bool CreateMaterialAssets() const;
+        void UpdateMaterialComponent() const;
 
         QAction* m_runDazImporterEditorAction = nullptr;
+
+        AZ::EntityId m_entityId;
+
     };
 } // namespace DazToO3DE
