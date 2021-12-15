@@ -147,10 +147,16 @@ namespace DazToO3DE
                     AZ_Printf("DazToO3DE:FbxStatus:", "Completed")
                     return DazToO3DEEditorSystemComponent::AssetStatus::Completed;
                 }
-                else
+                else if (assetJobInfo.m_status == AzToolsFramework::AssetSystem::JobStatus::Queued
+                      || assetJobInfo.m_status == AzToolsFramework::AssetSystem::JobStatus::InProgress)
                 {
                     AZ_Printf("DazToO3DE:FbxStatus:", "Pending")
                     return DazToO3DEEditorSystemComponent::AssetStatus::Pending;
+                }
+                else
+                {
+		            AZ_Printf("DazToO3DE:FbxStatus:", "Asset Processor job failed")
+		            return DazToO3DEEditorSystemComponent::AssetStatus::Failed;
                 }
             }
     	}
