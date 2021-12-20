@@ -1,0 +1,815 @@
+/**********************************************************************
+
+	The following is derived from a work published as part of the
+	Daz Script Documentation. This script, and/or any portion
+	thereof, may only be used in accordance with the following
+	license:
+
+	Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+	- http://creativecommons.org/licenses/by/3.0
+
+**********************************************************************/
+// Source: http://docs.daz3d.com/doku.php/public/software/dazstudio/4/referenceguide/scripting/api_reference/samples/actions/action_custom_remove/start
+// Source: http://docs.daz3d.com/doku.php/public/software/dazstudio/4/referenceguide/scripting/api_reference/samples/actions/action_custom_create/start
+
+// Define an anonymous function;
+// serves as our main loop,
+// limits the scope of variables
+(function(){
+	
+	/*********************************************************************/
+	// Boolean : Function for testing if a file exists on disk
+	function fileExists( sFilePath )
+	{
+		// Create a file info object
+		var oFileInfo = new DzFileInfo( sFilePath );
+		// Get whether or not the file exists
+		var bExists = oFileInfo.exists();
+		// Do not leak memory
+		oFileInfo.deleteLater();
+		// Return the answer
+		return bExists;
+	};
+	
+	/*********************************************************************/
+	// String : Function for finding a custom action; each parameter is optional
+	function findCustomAction( sActionText, sActionDesc, sActionFilePath, sActionIconPath )
+	{
+		// Get the action manager
+		var oActionMgr = MainWindow.getActionMgr();
+		
+		// Initialize
+		var oRequire = {
+			"text": typeof( sActionText ) == "string" && !sActionText.isEmpty(),
+			"desc": typeof( sActionDesc ) == "string" && !sActionDesc.isEmpty(),
+			"path": typeof( sActionFilePath ) == "string" && !sActionFilePath.isEmpty(),
+			"icon": typeof( sActionIconPath ) == "string" && !sActionIconPath.isEmpty()
+		};
+		
+		// Declare working variables
+		var oMatch;
+		var sName;
+		var sText;
+		var sDesc;
+		var sFile;
+		var sIcon;
+		
+		// Iterate over all custom actions
+		for( var i = 0, n = oActionMgr.getNumCustomActions(); i < n; i += 1 ){
+			// Initialize
+			oMatch = {};
+			
+			// Get 'current' custom action information
+			sName = oActionMgr.getCustomActionName( i );
+			sText = oActionMgr.getCustomActionText( i );
+			sDesc = oActionMgr.getCustomActionDesc( i );
+			sFile = oActionMgr.getCustomActionFile( i );
+			sIcon = oActionMgr.getCustomActionIcon( i );
+			
+			// If a text match is required
+			if( oRequire["text"] ){
+				// If the text is a match
+				if( sText.toLowerCase() == sActionText.toLowerCase() ){
+					// Record the text
+					oMatch["text"] = sText;
+				// If the text is not a match
+				} else {
+					// Next!!
+					continue;
+				}
+			}
+			
+			// If a description match is required
+			if( oRequire["desc"] ){
+				// If the description is a match
+				if( sDesc.toLowerCase() == sActionDesc.toLowerCase() ){
+					// Record the description
+					oMatch["desc"] = sDesc;
+				// If the description is not a match
+				} else {
+					// Next!!
+					continue;
+				}
+			}
+			
+			// If a file path match is required
+			if( oRequire["path"] ){
+				// If the file path is a match
+				if( sFile.toLowerCase() == sActionFilePath.toLowerCase() ){
+					// Record the file path
+					oMatch["path"] = sFile;
+				// If the file path is not a match
+				} else {
+					// Next!!
+					continue;
+				}
+			}
+			
+			// If a icon path match is required
+			if( oRequire["icon"] ){
+				// If the icon path is a match
+				if( sIcon.toLowerCase() == sActionIconPath.toLowerCase() ){
+					// Record the icon path
+					oMatch["icon"] = sIcon;
+				// If the icon path is not a match
+				} else {
+					// Next!!
+					continue;
+				}
+			}
+			
+			// Return the name of the action
+			return sName;
+		}
+		
+		// Return an empty string
+		return "";
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for removing a custom action; each parameter is optional
+	function removeCustomAction( sActionText, sActionDesc, sActionFilePath, sActionIconPath )
+	{
+		// Get the action manager
+		var oActionMgr = MainWindow.getActionMgr();
+		
+		// Get the name (GUID) of the custom action to remove
+		var sName = findCustomAction( sActionText, sActionDesc, sActionFilePath, sActionIconPath );
+		// If the custom action was not found
+		if( sName.isEmpty() ){
+			// We are done...
+			return false;
+		}
+		
+		// Get the index of the custom action
+		var nIdx = oActionMgr.getCustomAction( sName );
+		// If the custom action with the name could not be found
+		if( nIdx < 0 ){
+			// We are done...
+			return false;
+		}
+		
+		// Remove the custom action
+		oActionMgr.removeCustomAction( nIdx );
+		
+		// Return success
+		return true;
+	};
+	
+	/*********************************************************************/
+	// String : Function for creating a custom action
+	function createCustomAction( sActionText, sActionDesc, sActionFilePath, sActionIconPath, bUpdate )
+	{
+		// Get the action manager
+		var oActionMgr = MainWindow.getActionMgr();
+		
+		// Get the name (GUID) of the custom action to remove
+		var sName = findCustomAction( "", "", sActionFilePath, "" );
+		// If the custom action was not found
+		if( sName.isEmpty() ){
+			// If the file exists
+			if( fileExists( sActionFilePath ) ){
+				// If a icon path is passed in
+				if( !sActionIconPath.isEmpty() ){
+					// If the file does not exist
+					if( !fileExists( sActionIconPath ) ){
+						// Update it
+						sActionIconPath = "";
+					}
+				}
+				
+				// Add the custom action and return the name
+				return oActionMgr.addCustomAction(
+								sActionText,
+								sActionDesc,
+								sActionFilePath,
+								true,
+								"",
+								sActionIconPath );
+			}
+		// If the custom action was found and we are updating
+		} else if( bUpdate ){
+			// Get the index of the custom action
+			var nIdx = oActionMgr.getCustomAction( sName );
+			// If the custom action with the name could not be found
+			if( nIdx < 0 ){
+				// We are done...
+				return "";
+			}
+			
+			// Update the text
+			oActionMgr.setCustomActionText( nIdx, sActionText );
+			
+			// Update the description
+			oActionMgr.setCustomActionDesc( nIdx, sActionDesc );
+			
+			// If a icon path is passed in
+			if( !sActionIconPath.isEmpty() ){
+				// If the file does not exist
+				if( !fileExists( sActionIconPath ) ){
+					// Update it
+					sActionIconPath = "";
+				}
+			}
+			
+			// Update the icon path
+			oActionMgr.setCustomActionIcon( nIdx, sActionIconPath );
+			
+			// Return the name of the action
+			return sName;
+		}
+		
+		// Return an empty string
+		return "";
+	};
+	
+	/*********************************************************************/
+	// DzActionMenu : Function for getting/creating a menu path
+	function getActionMenu( sMenuPath, bCreate )
+	{
+		// Get the action manager
+		var oActionMgr = MainWindow.getActionMgr();
+		
+		// Initialize
+		var oMenu = oActionMgr.getMenu(); // main menu
+		var nIdx = -1;
+		var sCurrentPath = "";
+		var sSubPath = sMenuPath;
+		
+		// While we have a menu and the remaining path is not empty
+		while( oMenu && !sSubPath.isEmpty() ){
+			// Get the index of the first slash
+			nIdx = sSubPath.indexOf( "/" );
+			// If a slash was not found
+			if( nIdx < 0 ){
+				// We are at the end
+				sCurrentPath = sSubPath;
+				// Break the loop on the next iteration
+				sSubPath = "";
+			// If a slash was found
+			} else {
+				// The 'current' path is before the slash
+				sCurrentPath = sSubPath.left( nIdx );
+				// Get the remaining path
+				sSubPath = sSubPath.right( sSubPath.length - nIdx - 1 );
+			}
+			
+			// If we are creating menus that do not exist (default)
+			if( typeof( bCreate ) == "undefined" || bCreate ){
+				// Get/Create the sub menu
+				oMenu = oMenu.getSubMenu( sCurrentPath );
+			// If we are finding menus that do exist
+			} else {
+				// Find the sub menu
+				oMenu = oMenu.findSubMenu( sCurrentPath );
+			}
+		}
+		
+		// Return the menu
+		return oMenu;
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for removing empty custom action menus
+	function removeEmptyCustomMenu( sMenuPath, bAscend )
+	{
+		// Get the action menu for the path
+		var oMenu = getActionMenu( sMenuPath, false );
+		// If we do not have a menu
+		if( !oMenu ){
+			// We are done...
+			return false;
+		}
+		
+		// Declare working variable
+		var oMenuItem;
+		
+		// Initialize
+		var bCanRemove = true;
+		
+		// Iterate over the menu items
+		for( var i = 0, n = oMenu.getNumItems(); i < n; i += 1 ){
+			// Once we know we cannot remove the menu
+			if( !bCanRemove ){
+				// We are done...
+				break;
+			}
+			
+			// Get the 'current' menu item
+			oMenuItem = oMenu.getItem( i );
+			// Handle the various item types
+			switch( oMenuItem.type ){
+				// If the item is a submenu
+				case DzActionMenuItem.SubMenu:
+					// If it is in the default location (not custom)
+					if( oMenuItem.isDefault ){
+						// We cannot remove it
+						bCanRemove = false;
+					// If it is not in the default location (custom)
+					} else {
+						// Recurse and capture the result
+						bCanRemove = removeEmptyCustomMenu(
+							String( "%1/%2" ).arg( sMenuPath ).arg( oMenuItem.label ),
+							false );
+					}
+					break;
+				// If the item is an action or a type we do not recognize
+				case DzActionMenuItem.Action:
+				case DzActionMenuItem.CustomAction:
+				case DzActionMenuItem.FileOpenAction:
+				case DzActionMenuItem.FileMergeAction:
+				default:
+					// It is significant
+					bCanRemove = false;
+					break;
+				// If the item is a separator
+				case DzActionMenuItem.Separator:
+					// It is not significant
+					break;
+			}
+		}
+		
+		// If we cannot remove this menu
+		if( !bCanRemove ){
+			// We are done...
+			return bCanRemove;
+		}
+		
+		// Split the menu path into its parts
+		var aPathParts = sMenuPath.split( "/" );
+		// Get the label of this menu
+		var sMenuLabel = aPathParts.pop();
+		// Get the path of the parent menu
+		var sParentPath = aPathParts.join( "/" );
+		// Get the action menu for the parent path
+		var oParentMenu = getActionMenu( sParentPath, false );
+		// If we do not have a parent menu
+		if( !oParentMenu ){
+			// We are done...
+			return bCanRemove;
+		}
+		
+		// Get the item in the parent menu for this menu
+		oMenuItem = getMenuItemInParent( oParentMenu, sMenuLabel );
+		// If we have an item
+		if( oMenuItem ){
+			// Remove this menu from the parent menu
+			oParentMenu.removeItem( oMenuItem );
+		}
+		
+		// If we are ascending the menu hierarchy
+		if( bAscend ){
+			// Ascend and clean up
+			removeEmptyCustomMenu( sParentPath, bAscend );
+		}
+		
+		// Return whether or not this menu could be removed
+		return bCanRemove;
+	};
+	
+	/*********************************************************************/
+	// DzActionMenuItem : Function for retrieving a menu item in a parent menu
+	function getMenuItemInParent( oParentMenu, sLabel )
+	{
+		// Get the item in the parent menu for this menu
+		return getActionMenuItem(
+			oParentMenu,
+			DzActionMenuItem.SubMenu,
+			"label", sLabel );
+	};
+	
+	/*********************************************************************/
+	// DzActionMenuItem : Function for retrieving a menu item
+	function getActionMenuItem( oMenu, nType, sProperty, vValue )
+	{
+		// Declare working variable
+		var oItem;
+		
+		// Get the items in the menu
+		var aItems = oMenu.getItemList();
+		// Iterate over the items
+		for( var i = 0; i < aItems.length; i += 1 ){
+			// Get the 'current' item
+			oItem = aItems[ i ];
+			// If the item is not the type we want
+			if( oItem.type != nType ){
+				// Next!!
+				continue;
+			}
+			
+			// If the item is the one we want
+			if( oItem[ sProperty ] == vValue ){
+				// Return the item
+				return oItem;
+			}
+		}
+		
+		// Return undefined
+		return undefined;
+	};
+	
+	/*********************************************************************/
+	// DzActionMenuItem : Function for retrieving a menu item for an action
+	function getMenuActionItem( oMenu, sAction, bIsCustom )
+	{
+		// Return the action item
+		return getActionMenuItem(
+				oMenu,
+				bIsCustom ?
+					DzActionMenuItem.CustomAction :
+					DzActionMenuItem.Action,
+				"action",
+				sAction );
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for determining if a menu has an action
+	function menuHasAction( oMenu, sAction, bIsCustom )
+	{
+		// Return whether the action was found
+		return getMenuActionItem( oMenu, sAction, bIsCustom ) != undefined;
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for removing an action from a menu
+	function removeActionFromMenu( sMenuPath, sAction, bIsCustom, bCleanup )
+	{
+		// Initialize
+		var bStatus = false;
+		
+		// Get the action manager
+		var oActionMgr = MainWindow.getActionMgr();
+		
+		// Declare working variables
+		var oMenu;
+		
+		// Find the action;
+		// a custom action will yeild an index
+		// an action will yeild a DzAction
+		var vAction = (bIsCustom ?
+			oActionMgr.findCustomAction( sAction ) :
+			oActionMgr.findAction( sAction ));
+		// If the action was found
+		if( bIsCustom ? vAction > -1 : vAction ){
+			// Get the index of the pane delimiter
+			var nIdx = sMenuPath.indexOf( "::" );
+			// If the menu path contains the pane delimiter
+			if( nIdx > -1 ){
+				// Get the pane manager
+				var oPaneMgr = MainWindow.getPaneMgr();
+				// Get the pane class
+				var sPaneClass = sMenuPath.substring( 0, nIdx );
+				// Find the pane
+				var oPane = oPaneMgr.findPane( sPaneClass );
+				// If we have the pane
+				if( oPane ){
+					// Get the pane option menu
+					oMenu = oPane.getOptionsMenu();
+					// Get/Create the sub menu
+					oMenu = oMenu.getSubMenu( sMenuPath.substring( nIdx + 2 ) );
+				}
+			// If the menu path does not contain the pane delimiter
+			} else {
+				// Get the sub menu
+				oMenu = getActionMenu( sMenuPath, false );
+			}
+		}
+		
+		// If we have a menu
+		if( oMenu ){
+			// Get the item for the action
+			var oActionItem = getMenuActionItem( oMenu, sAction, bIsCustom );
+			// If we have an action item
+			if( oActionItem ){
+				// Remove the item from the menu
+				oMenu.removeItem( oActionItem );
+				
+				// Update our flag
+				bStatus = true;
+			}
+		}
+		
+		// If we are cleaning up (default)
+		if( typeof( bCleanup ) == "undefined" || bCleanup ){
+			// Remove empty custom menus
+			removeEmptyCustomMenu( sMenuPath, true );
+		}
+		
+		// Return whether the action was removed
+		return bStatus;
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for adding an action to a menu
+	function addActionToMenu( sMenuPath, sAction, bIsCustom, nIndex )
+	{
+		// Initialize
+		var bStatus = false;
+		
+		// Get the action manager
+		var oActionMgr = MainWindow.getActionMgr();
+		
+		// Declare working variables
+		var oMenu;
+		
+		// Find the action;
+		// a custom action will yeild an index
+		// an action will yeild a DzAction
+		var vAction = (bIsCustom ?
+			oActionMgr.findCustomAction( sAction ) :
+			oActionMgr.findAction( sAction ));
+		// If the action was found
+		if( bIsCustom ? vAction > -1 : vAction ){
+			// Get the index of the pane delimiter
+			var nIdx = sMenuPath.indexOf( "::" );
+			// If the menu path contains the pane delimiter
+			if( nIdx > -1 ){
+				// Get the pane manager
+				var oPaneMgr = MainWindow.getPaneMgr();
+				// Get the pane class
+				var sPaneClass = sMenuPath.substring( 0, nIdx );
+				// Find the pane
+				var oPane = oPaneMgr.findPane( sPaneClass );
+				// If we have the pane
+				if( oPane ){
+					// Get the pane option menu
+					oMenu = oPane.getOptionsMenu();
+					// Get/Create the sub menu
+					oMenu = oMenu.getSubMenu( sMenuPath.substring( nIdx + 2 ) );
+				}
+			// If the menu path does not contain the pane delimiter
+			} else {
+				// Get/Create the sub menu
+				oMenu = getActionMenu( sMenuPath, true );
+			}
+		}
+		
+		// If we have a menu and it does not have the action
+		if( oMenu && !menuHasAction( oMenu, sAction, bIsCustom ) ){
+			// If we have a custom action
+			if( bIsCustom ){
+				// Insert the custom action in the menu
+				oMenu.insertCustomAction( sAction, nIndex );
+			// If we have an action
+			} else {
+				// Insert the action in the menu
+				oMenu.insertAction( sAction, nIndex );
+			}
+			
+			// Update our flag
+			bStatus = true;
+		}
+		
+		// Return whether the action was added
+		return bStatus;
+	};
+	
+	/*********************************************************************/
+	// DzToolBar : Function for getting/creating a toolbar
+	function getToolBar( sToolBar, bCreate )
+	{
+		// Get the pane manager
+		var oPaneMgr = MainWindow.getPaneMgr();
+		
+		// Find the toolbar
+		var oToolBar = oPaneMgr.findToolBar( sToolBar );
+		// If the toolbar was not found and we are creating menus that
+		// do not exist (default)
+		if( !oToolBar && (typeof( bCreate ) == "undefined" || bCreate) ){
+			// Create the toolbar
+			oToolBar = oPaneMgr.createToolBar( sToolBar );
+		}
+		
+		// Return the toolbar
+		return oToolBar;
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for removing empty toolbars
+	function removeEmptyToolBar( sToolBar )
+	{
+		// Get the toolbar for with the name
+		var oToolBar = getToolBar( sToolBar, false );
+		// If we do not have a toolbar
+		if( !oToolBar ){
+			// We are done...
+			return false;
+		}
+		
+		// Declare working variable
+		var oItem;
+		
+		// Initialize
+		var bCanRemove = true;
+		
+		// Force events that may have removed items
+		// from the toolbar to be processed
+		processEvents();
+		
+		// Iterate over the toolbar items
+		for( var i = 0, n = oToolBar.getNumItems(); i < n; i += 1 ){
+			// Once we know we cannot remove the toolbar
+			if( !bCanRemove ){
+				// We are done...
+				break;
+			}
+			
+			// Get the 'current' toolbar item
+			oItem = oToolBar.getItem( i );
+			
+			// Handle the various item types
+			switch( oItem.type ){
+				// If the item is an action, widget,
+				// or a type we do not recognize
+				case DzToolBarItem.Action:
+				case DzToolBarItem.CustomAction:
+				case DzToolBarItem.CustomWidget:
+				default:
+					// It is significant
+					bCanRemove = false;
+					break;
+				// If the item is a separator/spacer
+				case DzToolBarItem.Separator:
+				case DzToolBarItem.ViewportLeftAlignSpacer:
+				case DzToolBarItem.ViewportCenterAlignSpacer:
+					// It is not significant
+					break;
+			}
+		}
+		
+		// If we cannot remove this toolbar
+		if( !bCanRemove ){
+			// We are done...
+			return bCanRemove;
+		}
+		
+		// Get the pane manager
+		var oPaneMgr = MainWindow.getPaneMgr();
+		// Remove this toolbar
+		oPaneMgr.removeToolBar( sToolBar );
+		
+		// Return whether or not this toolbar could be removed
+		return bCanRemove;
+	};
+	
+	/*********************************************************************/
+	// DzToolBarItem : Function for retrieving a toolbar item
+	function getToolBarItem( oToolBar, nType, sProperty, vValue )
+	{
+		// Declare working variable
+		var oItem;
+		
+		// Get the items in the toolbar
+		var aItems = oToolBar.getItemList();
+		// Iterate over the items
+		for( var i = 0; i < aItems.length; i += 1 ){
+			// Get the 'current' item
+			oItem = aItems[ i ];
+			// If the item is not the type we want
+			if( oItem.type != nType ){
+				// Next!!
+				continue;
+			}
+			
+			// If the item is the one we want
+			if( oItem[ sProperty ] == vValue ){
+				// Return the item
+				return oItem;
+			}
+		}
+		
+		// Return undefined
+		return undefined;
+	};
+	
+	/*********************************************************************/
+	// DzToolBarItem : Function for determining if a toolbar has an action
+	function getToolBarActionItem( oToolBar, sAction, bIsCustom )
+	{
+		// Return the action item
+		return getToolBarItem(
+				oToolBar,
+				bIsCustom ?
+					DzToolBarItem.CustomAction :
+					DzToolBarItem.Action,
+				"action",
+				sAction );
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for determining if a toolbar has an action
+	function toolBarHasAction( oToolBar, sAction, bIsCustom )
+	{
+		// Return whether the action was found
+		return getToolBarActionItem( oToolBar, sAction, bIsCustom ) != undefined;
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for removing an action from a toolbar
+	function removeActionFromToolBar( sToolBar, sAction, bIsCustom, bCleanup )
+	{
+		// Initialize
+		var bStatus = false;
+		
+		// Get the toolbar
+		var oToolBar = getToolBar( sToolBar, false );
+		
+		// If we have a toolbar
+		if( oToolBar ){
+			// Get the toolbar item for the action
+			var oItem = getToolBarActionItem( oToolBar, sAction, bIsCustom );
+			// If we have a toolbar item
+			if( oItem ){
+				// Remove the item from the toolbar
+				oToolBar.removeItem( oItem );
+				
+				// Update our flag
+				bStatus = true;
+			}
+		}
+		
+		// If we are cleaning up (default)
+		if( typeof( bCleanup ) == "undefined" || bCleanup ){
+			// Remove empty toolbar
+			removeEmptyToolBar( sToolBar );
+		}
+		
+		// Return whether the action was added
+		return bStatus;
+	};
+	
+	/*********************************************************************/
+	// Boolean : Function for adding an action to a toolbar
+	function addActionToToolBar( sToolBar, sAction, bIsCustom, nIndex )
+	{
+		// Initialize
+		var bStatus = false;
+		
+		// Get the toolbar
+		var oToolBar = getToolBar( sToolBar, true );
+		
+		// If we have a toolbar
+		if( oToolBar ){
+			// If we did not find the action
+			if( !toolBarHasAction( oToolBar, sAction, bIsCustom ) ){
+				// If we have a custom action
+				if( bIsCustom ){
+					// Insert the custom action in the toolbar
+					oToolBar.insertCustomAction( sAction, nIndex );
+				// If we have an action
+				} else {
+					// Insert the action in the toolbar
+					oToolBar.insertAction( sAction, nIndex );
+				}
+				
+				// Update our flag
+				bStatus = true;
+			}
+		}
+		
+		// Return whether the action was added
+		return bStatus;
+	};
+	
+	/*********************************************************************/
+	// Let the user know we are busy
+	setBusyCursor();
+	
+	// Define the custom action components
+	var sActionMenu = "&Scripts/Bridges";
+	var sActionToolbar = "Input Output";
+	
+	// --- Remove ---
+	
+	var sActionText = "Daz to O3DE";
+	var sActionDesc = "Bridge - Daz to O3DE";
+	var sActionFilePath = String("%1/support/DAZ/o3deBridge/Daz to O3DE.dsa").arg( App.getScriptsPath() );
+	sActionIconPath = "";
+	var sActionName = findCustomAction( sActionText, sActionDesc, sActionFilePath );
+	if( !sActionName.isEmpty() ){
+		removeActionFromMenu( sActionMenu, sActionName, true, true );
+		removeActionFromToolBar( sActionToolbar, sActionName, true, false );
+		removeCustomAction( sActionText, sActionDesc, sActionFilePath );
+	}
+
+	// --- Add ---
+	
+	sActionText = "Daz to O3DE";
+	sActionDesc = "Bridge - Daz to O3DE";
+	sActionFilePath = String("%1/support/DAZ/o3deBridge/Daz to O3DE.dsa").arg( App.getScriptsPath() );
+	sActionIconPath = "";
+	sActionName = createCustomAction( sActionText, sActionDesc, sActionFilePath, sActionIconPath, true );
+	if( !sActionName.isEmpty() ){
+		addActionToMenu( sActionMenu, sActionName, true, -1 );
+		if( fileExists( sActionIconPath ) ){
+			addActionToToolBar( sActionToolbar, sActionName, true, -1 );
+		} else {
+			removeActionFromToolBar( sActionToolbar, sActionName, true, false );
+		}
+	}
+	
+	// Let the user know we are done
+	clearBusyCursor();
+	
+// Finalize the function and invoke
+})();
