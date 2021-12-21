@@ -1,11 +1,9 @@
 # Daz To O3DE
----
 * Owner: [Daz 3D][OwnerURL] — [@Daz3d][TwitterURL]
 * License: [Apache License, Version 2.0][LicenseURL] - see ``LICENSE`` and ``NOTICE`` for more information.
 * Official Project: [github.com/daz3d/DazToO3DE][RepositoryURL]
 
 ## Prerequisites
----
 * A compatible version of the [Daz Studio][DazStudioURL] application
   * Minimum: 4.10
 * A compatible version of the [O3DE][O3deURL] application
@@ -14,7 +12,6 @@
   * Windows 7 or newer
 
 ## Manual Installation
----
 * Find the Newest Release [here][ReleasesURL].
  ### Steps to download a new release from GitHub
  * Go to the link listed above to find the newest release on GitHub.
@@ -53,7 +50,6 @@
 * While updating to a newer version of the bridge, replace the 'DazToO3DE' directory with the latest content.
 
 ## Directory Structure
----
 Files in this repository are organized into two distinct top-level directories, named after the applications that the files within them relate to. Within these directories are hierarchies of subdirectories that correspond to locations on the target machine. Portions of the hierarchy are consistent between the supported platforms and should be replicated exactly while others serve as placeholders for locations that vary depending on the platform of the target machine.
 
 Placeholder directory names used in this repository are:
