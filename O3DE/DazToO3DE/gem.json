@@ -1,10 +1,10 @@
 {
     "gem_name": "DazToO3DE",
-    "display_name": "DazToO3DE",
-    "license": "What license DazToO3DE uses goes here: i.e. https://opensource.org/licenses/MIT",
-    "origin": "The primary repo for DazToO3DE goes here: i.e. http://www.mydomain.com",
+    "display_name": "Daz To O3DE",
+    "license": "Licensed under the Apache License, Version 2.0 (the \"License\") i.e. http://www.apache.org/licenses/LICENSE-2.0",
+    "origin": "The primary repo for DazToO3DE: https://github.com/daz3d/DazToO3DE",
     "type": "Code",
-    "summary": "A short description of DazToO3DE.",
+    "summary": "Daz To O3DE is a gem that can be used to get content from Daz Studio into O3DE project",
     "canonical_tags": [
         "Gem"
     ],
