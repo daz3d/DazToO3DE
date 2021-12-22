@@ -1,5 +1,4 @@
 
-var g_sBridge = "O3DE"
 /** 
 * Contains the Dialogs for the User to Control
 * @class
@@ -28,8 +27,8 @@ function DzBridgeDialog( oBridgeExporter )
 		this.bAutoWeights;
 		this.bNewSubdiv;
 
-        this.sMorphDialog = String( "/dzBridgeUtils/Dz%1MorphSelectionDialog" ).arg( g_sBridge )
-	    this.sSubdivDialog = String( "/dzBridgeUtils/Dz%1SubdivisionDialog" ).arg( g_sBridge )
+        this.sMorphDialog = String( "/dzBridgeUtils/MorphSelectionDialog" )
+	    this.sSubdivDialog = String( "/dzBridgeUtils/SubdivisionDialog" )
         this.sPresetPath = oBridgeExporter.sPresetPath;
 
         this.aExportableProperties = [];

@@ -12,18 +12,18 @@ if( g_sScriptPath === "" ){
 g_oFileInfo.deleteLater();
 
 // Global Includes
-var g_sBridgeHelpers = String( "%2/dzBridgeUtils/Dz%1Helpers.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeEnv = String( "%2/dzBridgeUtils/Dz%1Environment.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeScene = String( "%2/dzBridgeUtils/Dz%1Scene.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgePose = String( "%2/dzBridgeUtils/Dz%1Morphs.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeMorphs = String( "%2/dzBridgeUtils/Dz%1Pose.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeAutoWeight = String( "%2/dzBridgeUtils/Dz%1AutoWeight.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeExporter = String( "%2/dzBridgeUtils/Dz%1BridgeExporter.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeDialog = String( "%2/dzBridgeUtils/Dz%1Dialog.dsa" ).arg( g_sBridge ).arg( g_sScriptPath )
-var g_sBridgeWriter = String( "%2/dzBridgeUtils/Dz%1Writer.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeFigure = String( "%2/dzBridgeUtils/Dz%1Figure.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeSubdiv = String( "%2/dzBridgeUtils/Dz%1Subdivision.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
-var g_sBridgeDforce = String( "%2/dzBridgeUtils/Dz%1Dforce.dsa" ).arg( g_sBridge ).arg( g_sScriptPath );
+var g_sBridgeHelpers = String( "%1/dzBridgeUtils/Helpers.dsa" ).arg( g_sScriptPath );
+var g_sBridgeEnv = String( "%1/dzBridgeUtils/Environment.dsa" ).arg( g_sScriptPath );
+var g_sBridgeScene = String( "%1/dzBridgeUtils/Scene.dsa" ).arg( g_sScriptPath );
+var g_sBridgePose = String( "%1/dzBridgeUtils/Morphs.dsa" ).arg( g_sScriptPath );
+var g_sBridgeMorphs = String( "%1/dzBridgeUtils/Pose.dsa" ).arg( g_sScriptPath );
+var g_sBridgeAutoWeight = String( "%1/dzBridgeUtils/AutoWeight.dsa" ).arg( g_sScriptPath );
+var g_sBridgeExporter = String( "%1/dzBridgeUtils/Exporter.dsa" ).arg( g_sScriptPath );
+var g_sBridgeDialog = String( "%1/dzBridgeUtils/Dialog.dsa" ).arg( g_sScriptPath )
+var g_sBridgeWriter = String( "%1/dzBridgeUtils/Writer.dsa" ).arg( g_sScriptPath );
+var g_sBridgeFigure = String( "%1/dzBridgeUtils/Figure.dsa" ).arg( g_sScriptPath );
+var g_sBridgeSubdiv = String( "%1/dzBridgeUtils/Subdivision.dsa" ).arg( g_sScriptPath );
+var g_sBridgeDforce = String( "%1/dzBridgeUtils/Dforce.dsa" ).arg( g_sScriptPath );
 
 include( g_sBridgeHelpers ); // Dependencies : ...
 include( g_sBridgeDforce ); // Dependencies : ...
