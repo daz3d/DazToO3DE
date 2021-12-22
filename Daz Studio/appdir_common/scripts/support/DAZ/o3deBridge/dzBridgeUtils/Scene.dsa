@@ -30,7 +30,7 @@ DzBridgeScene.superclass = DzBridgeHelpers.prototype;
 			"bIncludeSubdiv" : false,
 			"bIncludeAnim" : false,
 			"bIncludeMorphs" : false,
-			"bCollectTextures" : false,
+			"bCollectTextures" : true,
 			"bRemoveIncompatible" : false,
 			"bAutoWeights" : false,
 			"bNewSubdiv" : false,
